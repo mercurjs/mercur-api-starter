@@ -3,7 +3,6 @@ import { FindConfig, UserService as MedusaUserService, buildQuery } from '@medus
 import { User, UserStatus } from '../models/user';
 import { FilterableUserProps, CreateUserInput as MedusaCreateUserInput } from '@medusajs/medusa/dist/types/user';
 import StoreService from './store';
-import { EntityManager } from 'typeorm';
 import { MedusaError } from '@medusajs/utils';
 import { Selector } from '@medusajs/types';
 
@@ -48,15 +47,7 @@ class UserService extends MedusaUserService {
 	 * @returns {Promise<User>}
 	 */
 	async create(user: CreateUserInput, password: string): Promise<User> {
-		return await this.atomicPhase_(async (transactionManager: EntityManager) => {
-			if (!user.store_id) {
-				const newStore = await this.storeService.withTransaction(transactionManager).create();
-
-				user.store_id = newStore.id;
-			}
-
-			return await super.create(user, password);
-		});
+		return await super.create(user, password);
 	}
 
 	async retrieve(userId: string, config?: FindConfig<User>): Promise<User> {

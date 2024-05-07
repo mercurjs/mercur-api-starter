@@ -3,6 +3,7 @@ import { FindConfig, StoreService as MedusaStoreService, Store, buildQuery } fro
 import { User } from '../models/user';
 import StoreRepository from '../repositories/store';
 import { MedusaError } from 'medusa-core-utils';
+import { EntityManager } from 'typeorm';
 
 class StoreService extends MedusaStoreService {
 	static LIFE_TIME = Lifetime.SCOPED;
@@ -20,6 +21,28 @@ class StoreService extends MedusaStoreService {
 		}
 	}
 
+	async create(): Promise<Store> {
+		return await this.atomicPhase_(async (transactionManager: EntityManager) => {
+			const storeRepository = transactionManager.withRepository(this.storeRepository_);
+			const currencyRepository = transactionManager.withRepository(this.currencyRepository_);
+
+			const newStore = storeRepository.create();
+			// Add default currency (USD) to store currencies
+			const usd = await currencyRepository.findOne({
+				where: {
+					code: 'usd',
+				},
+			});
+
+			if (usd) {
+				newStore.currencies = [usd];
+			}
+
+			const store = await storeRepository.save(newStore);
+			return store;
+		});
+	}
+
 	async retrieve(config?: FindConfig<Store>): Promise<Store> {
 		const storeRepo = this.activeManager_.withRepository(this.storeRepository_);
 
@@ -34,24 +57,6 @@ class StoreService extends MedusaStoreService {
 			},
 			config
 		);
-
-		const store = await storeRepo.findOne(query);
-
-		if (!store) {
-			throw new MedusaError(MedusaError.Types.NOT_FOUND, 'Store does not exist');
-		}
-
-		return store;
-	}
-
-	async retrieveById(id: string): Promise<Store> {
-		const storeRepo = this.activeManager_.withRepository(this.storeRepository_);
-
-		const config = {
-			relations: ['currencies', 'default_currency', 'shipping_options'],
-		};
-
-		const query = buildQuery({ id }, config);
 
 		const store = await storeRepo.findOne(query);
 
