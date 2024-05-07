@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsEnum, IsEmpty } from 'class-validator';
+import { IsOptional, IsString, IsEnum, IsEmpty, IsObject } from 'class-validator';
 import { UserStatus } from '../../../../models/user';
 import { UserRoles } from '@medusajs/medusa';
 import { UserPermission } from '../../../../models/user';
@@ -25,4 +25,8 @@ export class AdminUpdateUserRequest {
 	})
 	@IsOptional()
 	status?: UserStatus;
+
+	@IsObject()
+	@IsOptional()
+	metadata?: Record<string, any>;
 }
