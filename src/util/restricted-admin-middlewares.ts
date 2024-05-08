@@ -33,9 +33,6 @@ export const restrictedAdminMiddlewares = [
 		matcher: '/admin/notifications*',
 	},
 	{
-		matcher: '/admin/order-edits*',
-	},
-	{
 		matcher: '/admin/payment-collections*',
 	},
 	{
