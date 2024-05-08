@@ -75,8 +75,7 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 
 			const newLineItems = lineItems.map((li) => {
 				return lineItemRepo.create({
-					...li,
-					id: null,
+					...omit(li, 'id'),
 				});
 			});
 
@@ -86,17 +85,12 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 				parent_id: order.id,
 				items: newLineItems,
 				store_id: storeId,
-				paid_total: totals.total,
-				refunded_total: 0,
-				shipping_tax_total: shippingMethods.reduce((acc, sm) => acc + sm.tax_total, 0),
-				shipping_total: shippingMethods.reduce((acc, sm) => acc + sm.total, 0),
 				...totals,
 			});
 
 			storeOrder.shipping_methods = shippingMethods.map((sm) => {
 				return shippingMethodRepo.create({
-					...omit(sm, 'id', 'cart_id'),
-					order_id: storeOrder.id,
+					...omit(sm, 'id'),
 				});
 			});
 

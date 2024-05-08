@@ -39,6 +39,10 @@ class CartService extends MedusaCartService {
 				throw new MedusaError(MedusaError.Types.NOT_FOUND, 'Shipping option not found for line item');
 			}
 
+			if (lineItem.cart_id !== cartId) {
+				throw new MedusaError(MedusaError.Types.NOT_FOUND, 'Line item not found in cart');
+			}
+
 			const cart = await this.retrieve(cartId, {
 				relations: ['shipping_methods'],
 			});
