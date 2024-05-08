@@ -88,19 +88,13 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 				...totals,
 			});
 
-			await Promise.all(
-				shippingMethods.map(async (sm) => {
-					await shippingMethodRepo.save(
-						shippingMethodRepo.create({
-							...sm,
-							id: null,
-							cart_id: null,
-
-							order_id: storeOrder.id,
-						})
-					);
-				})
-			);
+			storeOrder.shipping_methods = shippingMethods.map((sm) => {
+				return shippingMethodRepo.create({
+					...sm,
+					id: null,
+					order_id: storeOrder.id,
+				});
+			});
 
 			await orderRepo.save(storeOrder);
 		}
