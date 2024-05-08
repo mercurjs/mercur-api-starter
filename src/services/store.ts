@@ -24,8 +24,19 @@ class StoreService extends MedusaStoreService {
 	async createForUser() {
 		return await this.atomicPhase_(async (transactionManager: EntityManager) => {
 			const storeRepository = transactionManager.withRepository(this.storeRepository_);
+			const currencyRepository = transactionManager.withRepository(this.currencyRepository_);
 
 			const newStore = storeRepository.create();
+
+			const usd = await currencyRepository.findOne({
+				where: {
+					code: 'usd',
+				},
+			});
+
+			if (usd) {
+				newStore.currencies = [usd];
+			}
 
 			return await storeRepository.save(newStore);
 		});
