@@ -21,48 +21,51 @@ class StoreService extends MedusaStoreService {
 		}
 	}
 
-	async create(): Promise<Store> {
+	async createForUser() {
 		return await this.atomicPhase_(async (transactionManager: EntityManager) => {
 			const storeRepository = transactionManager.withRepository(this.storeRepository_);
-			const currencyRepository = transactionManager.withRepository(this.currencyRepository_);
 
 			const newStore = storeRepository.create();
-			// Add default currency (USD) to store currencies
-			const usd = await currencyRepository.findOne({
-				where: {
-					code: 'usd',
-				},
-			});
 
-			if (usd) {
-				newStore.currencies = [usd];
-			}
-
-			const store = await storeRepository.save(newStore);
-			return store;
+			return await storeRepository.save(newStore);
 		});
 	}
 
 	async retrieve(config?: FindConfig<Store>): Promise<Store> {
-		const storeRepo = this.activeManager_.withRepository(this.storeRepository_);
-
-		// If no user is logged in, return the first store
 		if (!this.loggedInUser_) {
-			return await super.retrieve(config);
+			return super.retrieve(config);
 		}
 
-		const query = buildQuery(
-			{
-				id: this.loggedInUser_.store_id,
-			},
-			config
-		);
+		return await this.retrieveForLoggedInUser(config);
+	}
 
-		const store = await storeRepo.findOne(query);
+	/**
+	 * Retrieves store by id
+	 * @param id
+	 * @param config
+	 * @returns
+	 */
+	async retrieve_(id: string, config?: FindConfig<Store>) {
+		const storeRepo = this.manager_.withRepository(this.storeRepository_);
+
+		const query = buildQuery({ id }, config);
+
+		const stores = await storeRepo.find(query);
+
+		const store = stores[0];
 
 		if (!store) {
-			throw new MedusaError(MedusaError.Types.NOT_FOUND, 'Store does not exist');
+			throw new MedusaError(MedusaError.Types.NOT_FOUND, 'Store not found');
 		}
+
+		return store;
+	}
+
+	async retrieveForLoggedInUser(config?: FindConfig<Store>) {
+		const store = await this.retrieve_(this.loggedInUser_.store_id, {
+			relations: [...(config?.relations ?? []), 'members'],
+			...config,
+		});
 
 		return store;
 	}

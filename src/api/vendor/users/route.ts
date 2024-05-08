@@ -28,7 +28,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
 	const manager: EntityManager = req.scope.resolve('manager');
 	const user = await manager.transaction(async (transactionManager) => {
-		const newStore = await storeService.withTransaction(transactionManager).create();
+		const newStore = await storeService.withTransaction(transactionManager).createForUser();
 
 		return await userService
 			.withTransaction(transactionManager)
