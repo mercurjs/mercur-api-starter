@@ -53,11 +53,21 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 				}
 			);
 
+			const lineItemIds = lineItems.map((li) => li.id);
+
+			const orderShippingMethods = order.shipping_methods.filter((sm) =>
+				lineItemIds.includes((sm.data as Record<string, string>).line_item_id)
+			);
+
 			// Create a new order for each store
 			const storeOrder = orderRepo.create({
+				...order,
 				parent_id: order.id,
 				items: lineItems,
 				store_id: storeId,
+				shipping_methods: orderShippingMethods,
+				shipping_tax_total: orderShippingMethods.reduce((acc, sm) => acc + sm.tax_total, 0),
+				shipping_total: orderShippingMethods.reduce((acc, sm) => acc + sm.total, 0),
 				...totals,
 			});
 
