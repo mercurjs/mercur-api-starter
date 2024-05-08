@@ -3,6 +3,7 @@ import OrderRepository from '../repositories/order';
 import { EntityManager } from 'typeorm';
 import LineItemRepository from '@medusajs/medusa/dist/repositories/line-item';
 import ShippingMethodRepository from '@medusajs/medusa/dist/repositories/shipping-method';
+import { omit } from 'lodash';
 
 /**
  * Subscribers that listen to the `order-placed` event.
@@ -21,7 +22,13 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 		const shippingMethodRepo = manager.withRepository(shippingMethodRepository);
 
 		const order = await orderService.withTransaction(manager).retrieveWithTotals(data.id, {
-			relations: ['items', 'items.variant', 'items.variant.product', 'items.variant.product.store'],
+			relations: [
+				'items',
+				'items.variant',
+				'items.variant.product',
+				'items.variant.product.store',
+				'shipping_methods',
+			],
 		});
 
 		const storeProductsMap = new Map<string, LineItem[]>();
@@ -60,6 +67,12 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 				}
 			);
 
+			const lineItemIds = lineItems.map((li) => li.id);
+
+			const shippingMethods = order.shipping_methods.filter((sm) =>
+				lineItemIds.includes((sm.data as Record<string, string>).line_item_id)
+			);
+
 			const newLineItems = lineItems.map((li) => {
 				return lineItemRepo.create({
 					...li,
@@ -67,17 +80,9 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 				});
 			});
 
-			const lineItemIds = lineItems.map((li) => li.id);
-
-			const shippingMethods = order.shipping_methods.filter((sm) =>
-				lineItemIds.includes((sm.data as Record<string, string>).line_item_id)
-			);
-
 			// Create a new order for each store
 			const storeOrder = orderRepo.create({
-				...order,
-				id: null,
-				cart_id: null,
+				...omit(order, 'id', 'cart_id'),
 				parent_id: order.id,
 				items: newLineItems,
 				store_id: storeId,
@@ -90,8 +95,7 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 
 			storeOrder.shipping_methods = shippingMethods.map((sm) => {
 				return shippingMethodRepo.create({
-					...sm,
-					id: null,
+					...omit(sm, 'id', 'cart_id'),
 					order_id: storeOrder.id,
 				});
 			});
