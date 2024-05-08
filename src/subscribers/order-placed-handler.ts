@@ -2,6 +2,7 @@ import { type SubscriberConfig, type SubscriberArgs, OrderService, LineItem } fr
 import OrderRepository from '../repositories/order';
 import { EntityManager } from 'typeorm';
 import LineItemRepository from '@medusajs/medusa/dist/repositories/line-item';
+import ShippingMethodRepository from '@medusajs/medusa/dist/repositories/shipping-method';
 
 /**
  * Subscribers that listen to the `order-placed` event.
@@ -12,10 +13,13 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 	const orderRepository_: typeof OrderRepository = container.resolve('orderRepository');
 	const manager: EntityManager = container.resolve('manager');
 	const lineItemRepository: typeof LineItemRepository = container.resolve('lineItemRepository');
+	const shippingMethodRepository: typeof ShippingMethodRepository = container.resolve('shippingMethodRepository');
 
 	await manager.transaction(async (manager) => {
 		const orderRepo = manager.withRepository(orderRepository_);
 		const lineItemRepo = manager.withRepository(lineItemRepository);
+		const shippingMethodRepo = manager.withRepository(shippingMethodRepository);
+
 		const order = await orderService.withTransaction(manager).retrieveWithTotals(data.id, {
 			relations: ['items', 'items.variant', 'items.variant.product', 'items.variant.product.store'],
 		});
@@ -65,9 +69,16 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 
 			const lineItemIds = lineItems.map((li) => li.id);
 
-			const orderShippingMethods = order.shipping_methods.filter((sm) =>
+			const parentShippingMethods = order.shipping_methods.filter((sm) =>
 				lineItemIds.includes((sm.data as Record<string, string>).line_item_id)
 			);
+
+			const orderShippingMethods = parentShippingMethods.map((sm) => {
+				return shippingMethodRepo.create({
+					...sm,
+					id: null,
+				});
+			});
 
 			// Create a new order for each store
 			const storeOrder = orderRepo.create({
@@ -78,8 +89,8 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 				items: newLineItems,
 				store_id: storeId,
 				shipping_methods: orderShippingMethods,
-				shipping_tax_total: orderShippingMethods.reduce((acc, sm) => acc + sm.tax_total, 0),
-				shipping_total: orderShippingMethods.reduce((acc, sm) => acc + sm.total, 0),
+				shipping_tax_total: parentShippingMethods.reduce((acc, sm) => acc + sm.tax_total, 0),
+				shipping_total: parentShippingMethods.reduce((acc, sm) => acc + sm.total, 0),
 				...totals,
 			});
 
