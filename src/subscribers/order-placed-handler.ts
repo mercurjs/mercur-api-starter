@@ -69,16 +69,9 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 
 			const lineItemIds = lineItems.map((li) => li.id);
 
-			const parentShippingMethods = order.shipping_methods.filter((sm) =>
+			const shippingMethods = order.shipping_methods.filter((sm) =>
 				lineItemIds.includes((sm.data as Record<string, string>).line_item_id)
 			);
-
-			const orderShippingMethods = parentShippingMethods.map((sm) => {
-				return shippingMethodRepo.create({
-					...sm,
-					id: null,
-				});
-			});
 
 			// Create a new order for each store
 			const storeOrder = orderRepo.create({
@@ -90,10 +83,18 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 				store_id: storeId,
 				paid_total: totals.total,
 				refunded_total: 0,
-				shipping_methods: orderShippingMethods,
-				shipping_tax_total: parentShippingMethods.reduce((acc, sm) => acc + sm.tax_total, 0),
-				shipping_total: parentShippingMethods.reduce((acc, sm) => acc + sm.total, 0),
+				shipping_tax_total: shippingMethods.reduce((acc, sm) => acc + sm.tax_total, 0),
+				shipping_total: shippingMethods.reduce((acc, sm) => acc + sm.total, 0),
 				...totals,
+			});
+
+			storeOrder.shipping_methods = shippingMethods.map((sm) => {
+				return shippingMethodRepo.create({
+					...sm,
+					id: null,
+					cart_id: null,
+					order_id: storeOrder.id,
+				});
 			});
 
 			await orderRepo.save(storeOrder);
