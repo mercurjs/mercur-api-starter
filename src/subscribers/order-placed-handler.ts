@@ -62,6 +62,7 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 			// Create a new order for each store
 			const storeOrder = orderRepo.create({
 				...order,
+				id: null,
 				parent_id: order.id,
 				items: lineItems,
 				store_id: storeId,
