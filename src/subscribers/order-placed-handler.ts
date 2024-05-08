@@ -14,7 +14,7 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 	await manager.transaction(async (manager) => {
 		const orderRepo = manager.withRepository(orderRepository_);
 		const order = await orderService.withTransaction(manager).retrieveWithTotals(data.id, {
-			relations: ['items', 'items.variant', 'items.variant.product'],
+			relations: ['items', 'items.variant', 'items.variant.product', 'items.variant.product.store'],
 		});
 
 		const storeProductsMap = new Map<string, LineItem[]>();
