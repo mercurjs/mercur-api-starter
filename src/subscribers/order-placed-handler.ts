@@ -89,7 +89,6 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 				items: newLineItems,
 				store_id: storeId,
 				paid_total: totals.total,
-				refunded_total: 0,
 				shipping_methods: orderShippingMethods,
 				shipping_tax_total: parentShippingMethods.reduce((acc, sm) => acc + sm.tax_total, 0),
 				shipping_total: parentShippingMethods.reduce((acc, sm) => acc + sm.total, 0),
