@@ -33,7 +33,7 @@
 		"@medusajs/event-bus-local": "latest",
 		"@medusajs/event-bus-redis": "latest",
 		"@medusajs/file-local": "latest",
-		"@medusajs/medusa": "latest",
+		"@medusajs/medusa": "^1.20.6",
 		"@tanstack/react-query": "4.22.0",
 		"body-parser": "^1.19.0",
 		"class-validator": "^0.14.1",
