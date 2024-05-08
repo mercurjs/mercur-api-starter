@@ -1,6 +1,7 @@
 import { type SubscriberConfig, type SubscriberArgs, OrderService, LineItem } from '@medusajs/medusa';
 import OrderRepository from '../repositories/order';
 import { EntityManager } from 'typeorm';
+import LineItemRepository from '@medusajs/medusa/dist/repositories/line-item';
 
 /**
  * Subscribers that listen to the `order-placed` event.
@@ -10,9 +11,11 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 	const orderService: OrderService = container.resolve('orderService');
 	const orderRepository_: typeof OrderRepository = container.resolve('orderRepository');
 	const manager: EntityManager = container.resolve('manager');
+	const lineItemRepository: typeof LineItemRepository = container.resolve('lineItemRepository');
 
 	await manager.transaction(async (manager) => {
 		const orderRepo = manager.withRepository(orderRepository_);
+		const lineItemRepo = manager.withRepository(lineItemRepository);
 		const order = await orderService.withTransaction(manager).retrieveWithTotals(data.id, {
 			relations: ['items', 'items.variant', 'items.variant.product', 'items.variant.product.store'],
 		});
@@ -53,6 +56,13 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 				}
 			);
 
+			const newLineItems = lineItems.map((li) => {
+				return lineItemRepo.create({
+					...li,
+					id: null,
+				});
+			});
+
 			const lineItemIds = lineItems.map((li) => li.id);
 
 			const orderShippingMethods = order.shipping_methods.filter((sm) =>
@@ -65,7 +75,7 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 				id: null,
 				cart_id: null,
 				parent_id: order.id,
-				items: lineItems,
+				items: newLineItems,
 				store_id: storeId,
 				shipping_methods: orderShippingMethods,
 				shipping_tax_total: orderShippingMethods.reduce((acc, sm) => acc + sm.tax_total, 0),
