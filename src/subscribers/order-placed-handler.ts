@@ -43,32 +43,6 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 		}
 
 		for (const [storeId, lineItems] of storeProductsMap) {
-			// Calculate total for each store
-			const totals = lineItems.reduce(
-				(acc, item) => {
-					return {
-						subtotal: acc.subtotal + item.subtotal,
-						tax_total: acc.tax_total + item.tax_total,
-						total: acc.total + item.total,
-						original_total: acc.original_total + item.original_total,
-						original_tax_total: acc.original_tax_total + item.original_tax_total,
-						discount_total: acc.discount_total + item.discount_total,
-						raw_discount_total: acc.raw_discount_total + item.raw_discount_total,
-						gift_card_total: acc.gift_card_total + item.gift_card_total,
-					};
-				},
-				{
-					subtotal: 0,
-					tax_total: 0,
-					total: 0,
-					original_total: 0,
-					original_tax_total: 0,
-					discount_total: 0,
-					raw_discount_total: 0,
-					gift_card_total: 0,
-				}
-			);
-
 			const lineItemIds = lineItems.map((li) => li.id);
 
 			const shippingMethods = order.shipping_methods.filter((sm) =>
@@ -83,11 +57,10 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 
 			// Create a new order for each store
 			const storeOrder = orderRepo.create({
-				...omit(order, 'id', 'cart_id'),
+				...omit(order, 'id', 'cart_id', 'gift_cards', 'discounts'),
 				parent_id: order.id,
 				items: newLineItems,
 				store_id: storeId,
-				...totals,
 			});
 
 			storeOrder.shipping_methods = shippingMethods.map((sm) => {
