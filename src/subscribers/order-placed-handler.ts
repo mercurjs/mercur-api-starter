@@ -28,6 +28,8 @@ export default async function orderPlacedHandler({ data, container }: Subscriber
 				'items.variant.product',
 				'items.variant.product.store',
 				'shipping_methods',
+				'gift_cards',
+				'discounts',
 			],
 		});
 

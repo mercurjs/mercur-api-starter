@@ -23,7 +23,7 @@ class OrderService extends MedusaOrderService {
 	}
 
 	private prepareListConfig_(selector: OrderSelector) {
-		if (!selector.store_id && this.loggedInUser_?.store_id) {
+		if (this.loggedInUser_ && !selector.store_id) {
 			selector.store_id = this.loggedInUser_.store_id;
 		}
 	}

@@ -13,7 +13,8 @@ type CreateUserInput = {
 } & MedusaCreateUserInput;
 
 class UserService extends MedusaUserService {
-	static LIFE_TIME = Lifetime.SCOPED;
+	static LIFE_TIME = Lifetime.TRANSIENT;
+
 	protected readonly loggedInUser_: User | null;
 	protected readonly storeService: StoreService;
 
