@@ -43,7 +43,7 @@ class StoreService extends MedusaStoreService {
 	}
 
 	async retrieve(config?: FindConfig<Store>): Promise<Store> {
-		if (!this.loggedInUser_) {
+		if (!this.loggedInUser_.store_id) {
 			return super.retrieve(config);
 		}
 
