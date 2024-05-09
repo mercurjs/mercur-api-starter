@@ -48,7 +48,12 @@ class UserService extends MedusaUserService {
 	 * @returns {Promise<User>}
 	 */
 	async create(user: CreateUserInput, password: string): Promise<User> {
-		return await super.create(user, password);
+		return await this.atomicPhase_(async (manager) => {
+			const newStore = await this.storeService.withTransaction(manager).createForUser();
+
+			// @ts-ignore - store_id is not in CreateUserInput
+			return await super.create({ ...user, store_id: newStore.id }, password);
+		});
 	}
 
 	async retrieve(userId: string, config?: FindConfig<User>): Promise<User> {
