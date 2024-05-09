@@ -2,6 +2,12 @@
 
 This marketplace starter provides a foundational example to help you build and customize your own marketplace using Medusa.js. Begin your project with this starter template and tailor it to meet your specific needs.
 
+## Getting Started
+
+Visit the [Quickstart Guide](https://docs.medusajs.com/create-medusa-app) to set up a server.
+
+Visit the [Docs](https://docs.medusajs.com/development/backend/prepare-environment) to learn more about our system requirements.
+
 # User Management
 
 The user management is facilitated by three additional columns in the user table: `is_admin`, `store_id` and `status`. A marketplace admin is identified by the `is_admin` column set to TRUE, and `store_id` set to NULL, indicating an administrative role. Additionally, the `role` column in the user table can be utilized to implement Role-Based Access Control (RBAC) for marketplace and store users. Vendor after register has status set to `pending` and only after admin changes that status to `active` vendor can log in.
