@@ -1,6 +1,6 @@
 import { MiddlewaresConfig, authenticate } from '@medusajs/medusa';
 import cors from 'cors';
-import { adminCors, storeCors } from '../util/cors';
+import { adminCors } from '../util/cors';
 import { registerLoggedInUser } from '../middlewares/register-logged-in-user';
 import { restrictedAdminMiddlewares } from '../util/restricted-admin-middlewares';
 
@@ -13,7 +13,7 @@ export const config: MiddlewaresConfig = {
 		},
 		{
 			matcher: '/vendor/*',
-			middlewares: [cors(storeCors)],
+			middlewares: [cors(adminCors)],
 		},
 		...restrictedAdminMiddlewares,
 	],

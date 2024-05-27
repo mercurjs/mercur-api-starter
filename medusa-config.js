@@ -40,6 +40,14 @@ const plugins = [
 			upload_dir: 'uploads',
 		},
 	},
+	{
+		resolve: '@rigby-software-house/mercurjs-vendor',
+		options: {},
+	},
+	{
+		resolve: '@medusajs/admin',
+		options: {},
+	},
 ];
 
 const modules = {

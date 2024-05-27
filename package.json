@@ -17,14 +17,17 @@
 		"build": "cross-env npm run clean && npm run build:server",
 		"build:server": "cross-env npm run clean && tsc -p tsconfig.server.json",
 		"build:admin": "cross-env medusa-admin build",
+		"build:vendor": "cross-env medusa-vendor build",
 		"watch": "cross-env tsc --watch",
 		"test": "cross-env jest",
 		"seed": "cross-env medusa seed -f ./data/seed.json",
 		"start": "cross-env npm run build && medusa start",
 		"start:custom": "cross-env npm run build && node --preserve-symlinks --trace-warnings index.js",
 		"dev": "cross-env npm run build:server && medusa develop",
+		"dev:vendor": "cross-env medusa-vendor develop",
 		"generate:migration": "npx typeorm migration:create",
-		"lint": "./node_modules/.bin/eslint src/ --fix"
+		"lint": "./node_modules/.bin/eslint src/ --fix",
+		"postinstall": "patch-package"
 	},
 	"dependencies": {
 		"@medusajs/admin": "latest",
@@ -33,7 +36,10 @@
 		"@medusajs/event-bus-local": "latest",
 		"@medusajs/event-bus-redis": "latest",
 		"@medusajs/file-local": "latest",
+		"@medusajs/icons": "^1.2.1",
 		"@medusajs/medusa": "^1.20.6",
+		"@medusajs/ui": "^3.0.0",
+		"@rigby-software-house/mercurjs-vendor": "^0.0.2",
 		"@tanstack/react-query": "4.22.0",
 		"body-parser": "^1.19.0",
 		"class-validator": "^0.14.1",
@@ -45,6 +51,7 @@
 		"medusa-interfaces": "latest",
 		"medusa-payment-manual": "latest",
 		"medusa-payment-stripe": "latest",
+		"patch-package": "^8.0.0",
 		"pg-god": "^1.0.12",
 		"prism-react-renderer": "^2.0.4",
 		"typeorm": "^0.3.16"
@@ -63,6 +70,7 @@
 		"@typescript-eslint/parser": "^5.4.0",
 		"babel-preset-medusa-package": "^1.1.19",
 		"cross-env": "^7.0.3",
+		"cypress": "^13.10.0",
 		"eslint": "^8.3.0",
 		"eslint-config-prettier": "^8.3.0",
 		"eslint-plugin-prettier": "^4.0.0",
@@ -99,5 +107,6 @@
 		"coverageDirectory": "./coverage",
 		"testEnvironment": "node"
 	},
-	"main": "index.js"
+	"main": "index.js",
+	"packageManager": "yarn@4.2.2"
 }

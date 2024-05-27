@@ -1,0 +1,17 @@
+diff --git a/node_modules/@medusajs/admin-ui/ui/src/domain/settings/index.tsx b/node_modules/@medusajs/admin-ui/ui/src/domain/settings/index.tsx
+index 88b7b89..706b8c1 100644
+--- a/node_modules/@medusajs/admin-ui/ui/src/domain/settings/index.tsx
++++ b/node_modules/@medusajs/admin-ui/ui/src/domain/settings/index.tsx
+@@ -84,12 +84,6 @@ const settings: SettingsCardType[] = [
+     icon: TaxesIcon,
+     to: "/a/settings/taxes",
+   },
+-  {
+-    heading: "The Team",
+-    description: "Manage users of your Medusa Store",
+-    icon: UsersIcon,
+-    to: "/a/settings/team",
+-  },
+ ]
+ 
+ const renderCard = ({

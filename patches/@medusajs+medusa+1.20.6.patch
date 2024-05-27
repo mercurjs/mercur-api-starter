@@ -1,0 +1,13 @@
+diff --git a/node_modules/@medusajs/medusa/dist/commands/develop.js b/node_modules/@medusajs/medusa/dist/commands/develop.js
+index 799796b..3660aa1 100644
+--- a/node_modules/@medusajs/medusa/dist/commands/develop.js
++++ b/node_modules/@medusajs/medusa/dist/commands/develop.js
+@@ -147,7 +147,7 @@ function default_1(_a) {
+             }
+             chokidar_1.default
+                 .watch("".concat(directory, "/src"), {
+-                ignored: "".concat(directory, "/src/admin"),
++                ignored: ["".concat(directory, "/src/admin"), "".concat(directory, "/src/vendor")],
+             })
+                 .on("change", function (file) {
+                 var f = file.split("src")[1];
