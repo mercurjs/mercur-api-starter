@@ -1,16 +1,24 @@
-import { Lifetime } from 'awilix';
 import { FindConfig, UserService as MedusaUserService, buildQuery } from '@medusajs/medusa';
-import { User, UserStatus } from '../models/user';
-import { FilterableUserProps, CreateUserInput as MedusaCreateUserInput } from '@medusajs/medusa/dist/types/user';
-import StoreService from './store';
-import { MedusaError } from '@medusajs/utils';
+import {
+	FilterableUserProps,
+	CreateUserInput as MedusaCreateUserInput,
+	UpdateUserInput as MedusaUpdateUserInput,
+} from '@medusajs/medusa/dist/types/user';
 import { Selector } from '@medusajs/types';
+import { MedusaError } from '@medusajs/utils';
+import { Lifetime } from 'awilix';
+import { User, UserPermission, UserStatus } from '../models/user';
+import StoreService from './store';
 
 type CreateUserInput = {
 	store_id?: string;
 	status?: UserStatus;
 	is_admin?: boolean;
 } & MedusaCreateUserInput;
+
+type UpdateUserInput = {
+	status?: UserStatus;
+} & MedusaUpdateUserInput;
 
 class UserService extends MedusaUserService {
 	static LIFE_TIME = Lifetime.TRANSIENT;
@@ -101,6 +109,22 @@ class UserService extends MedusaUserService {
 		this.prepareListConfig_(selector);
 
 		return await super.listAndCount(selector, config);
+	}
+
+	async update(userId: string, update: UpdateUserInput): Promise<User> {
+		const permission = this.loggedInUser_.is_admin ? UserPermission.ADMIN : UserPermission.VENDOR;
+
+		if (permission !== UserPermission.ADMIN) {
+			if (update.role) {
+				throw new MedusaError(MedusaError.Types.INVALID_DATA, 'You are not allowed to change user role');
+			}
+
+			if (update.status) {
+				throw new MedusaError(MedusaError.Types.INVALID_DATA, 'You are not allowed to change user status');
+			}
+		}
+
+		return await super.update(userId, update);
 	}
 }
 
