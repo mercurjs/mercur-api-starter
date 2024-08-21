@@ -31,23 +31,30 @@ const DATABASE_URL = process.env.DATABASE_URL || 'postgres://localhost/medusa-st
 
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 
+const isSeeding = process.env.npm_lifecycle_event === 'seed';
+
 const plugins = [
-	`medusa-fulfillment-manual`,
-	`medusa-payment-manual`,
-	{
-		resolve: `@medusajs/file-local`,
-		options: {
-			upload_dir: 'uploads',
-		},
-	},
-	{
-		resolve: '@rigby-software-house/mercurjs-vendor',
-		options: {},
-	},
-	{
-		resolve: '@medusajs/admin',
-		options: {},
-	},
+    `medusa-fulfillment-manual`,
+    `medusa-payment-manual`,
+    {
+        resolve: `@medusajs/file-local`,
+        options: {
+            upload_dir: 'uploads',
+        },
+    },
+    // Only include these plugins if not seeding
+    ...(!isSeeding
+        ? [
+            {
+                resolve: '@rigby-software-house/mercurjs-vendor',
+                options: {},
+            },
+            {
+                resolve: '@medusajs/admin',
+                options: {},
+            },
+        ]
+        : []),
 ];
 
 const modules = {
