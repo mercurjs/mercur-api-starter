@@ -19,7 +19,8 @@ class AdminPostProductsProductReq extends MedusaAdminPostProductsProductReq {
 	shipping_options?: string[];
 }
 
-export class AdminUpdateUserRequest extends MedusaAdminUpdateUserRequest {
+// change this to a local class declaration
+class AdminUpdateUserRequest extends MedusaAdminUpdateUserRequest {
 	@IsEnum(UserStatus)
 	@IsOptional()
 	status?: UserStatus;
@@ -27,3 +28,8 @@ export class AdminUpdateUserRequest extends MedusaAdminUpdateUserRequest {
 
 registerOverriddenValidators(AdminPostProductsReq);
 registerOverriddenValidators(AdminPostProductsProductReq);
+/**
+ * We have to register the external validator AdminUpdateUserRequest as an
+ * override for the vendor update request so the new field status gets recognized
+*/
+registerOverriddenValidators(AdminUpdateUserRequest);
